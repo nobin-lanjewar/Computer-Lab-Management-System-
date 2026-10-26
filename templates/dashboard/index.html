@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Computer Lab Management System{% endblock %}
+{% block content %}
+<h1 class="mb-4">Computer Lab Dashboard</h1>
+<div class="row g-3">
+    <div class="col-sm-6 col-lg-4"><div class="card h-100"><div class="card-body"><h2 class="h6 text-muted">Labs</h2><p class="display-6 mb-0">{{ lab_count }}</p></div></div></div>
+    <div class="col-sm-6 col-lg-4"><div class="card h-100"><div class="card-body"><h2 class="h6 text-muted">Computers</h2><p class="display-6 mb-0">{{ computer_count }}</p></div></div></div>
+    <div class="col-sm-6 col-lg-4"><div class="card h-100"><div class="card-body"><h2 class="h6 text-muted">Available computers</h2><p class="display-6 mb-0">{{ available_computer_count }}</p></div></div></div>
+    <div class="col-sm-6 col-lg-4"><div class="card h-100"><div class="card-body"><h2 class="h6 text-muted">Students</h2><p class="display-6 mb-0">{{ student_count }}</p></div></div></div>
+    <div class="col-sm-6 col-lg-4"><div class="card h-100"><div class="card-body"><h2 class="h6 text-muted">Schedules</h2><p class="display-6 mb-0">{{ schedule_count }}</p></div></div></div>
+</div>
+<p class="mt-4 text-muted">Use the navigation to view or add records. For full record management, open Django admin.</p>
+{% endblock %}

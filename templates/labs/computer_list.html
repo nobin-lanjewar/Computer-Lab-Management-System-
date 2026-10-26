@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Computers | Computer Lab Management System{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">Computers</h1>
+    <a class="btn btn-primary" href="{% url 'labs:computer-create' %}">Add computer</a>
+</div>
+{% if computers %}
+<div class="table-responsive"><table class="table table-striped align-middle">
+    <thead><tr><th>Computer number</th><th>Lab</th><th>Status</th><th>Specifications</th></tr></thead>
+    <tbody>{% for computer in computers %}<tr><td>{{ computer.computer_number }}</td><td>{{ computer.lab.name }}</td><td>{{ computer.get_status_display }}</td><td>{{ computer.specifications|default:"—" }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="text-muted">No computers have been added yet.</p>{% endif %}
+{% endblock %}

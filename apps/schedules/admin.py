@@ -13,6 +13,7 @@ class LabScheduleAdmin(admin.ModelAdmin):
         "computer",
         "student",
         "class_name",
+        "status",
     )
-    list_filter = ("date", "lab")
+    list_filter = ("date", "lab", "status")
     search_fields = ("purpose", "class_name", "student__name", "computer__computer_number")

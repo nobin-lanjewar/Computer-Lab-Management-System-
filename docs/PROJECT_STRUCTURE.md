@@ -5,17 +5,17 @@ This guide describes the purpose of the important files in the Computer Lab Mana
 ## Project root
 
 - `manage.py` runs Django management commands such as `runserver`, `migrate`, `createsuperuser`, and `test`.
-- `requirements.txt` lists the Python packages needed to install the project. Django is the only required package.
+- `requirements.txt` lists Django and `python-dotenv`.
 - `README.md` introduces the project and explains its setup, features, database, and Windows commands.
 - `.gitignore` excludes virtual environments, generated Python files, the local SQLite database, local environment files, and other generated output from Git.
-- `.env.example` lists environment-variable names with safe placeholders. It is a reference, not a real secret file, and Django does not load it automatically.
+- `.env.example` lists environment-variable names with an empty secret value. Django loads a developer's untracked `.env`, never the example file.
 - `tests/` is the root package for any future project-wide tests. App-specific tests currently live beside their apps.
 
 ## Django configuration
 
 - `config/__init__.py` marks `config` as a Python package.
-- `config/settings.py` configures installed Django and project apps, middleware, templates, authentication, static files, SQLite, and environment-based secret/debug/host settings.
-- `config/urls.py` is the main URL router. It connects the dashboard, lab/computer, student, schedule, login/logout, and admin URLs.
+- `config/settings.py` configures installed Django and project apps, middleware, templates, authentication, static files, SQLite, and environment-based secret/debug/host settings. In development a missing secret is generated temporarily; production requires an explicit key.
+- `config/urls.py` is the main URL router. It connects the dashboard, lab/computer/maintenance, student, booking, login/logout, and admin URLs.
 - `config/asgi.py` exposes the ASGI application for compatible servers.
 - `config/wsgi.py` exposes the WSGI application for compatible servers.
 
@@ -24,51 +24,56 @@ This guide describes the purpose of the important files in the Computer Lab Mana
 - `apps/__init__.py` makes the app collection importable as a Python package.
 - Each app's `apps.py` gives Django its app configuration and display name.
 - Each app's `migrations/__init__.py` marks the migration directory as a package. Run `makemigrations` to create the initial migration files from the models.
+- `apps/common/views.py` supplies a shared delete view that reports protected relationships without deleting dependent data.
 
 ### `apps/labs/`
 
-- `models.py` stores `Lab` records (unique name and room number, description) and `Computer` records (number, lab relationship, specifications, and Available/In Use/Under Maintenance status). A computer number is unique within its lab.
-- `views.py` displays and creates labs and computers. Editing and deleting through custom pages are future work; Django admin currently provides record management.
-- `forms.py` defines the lab and computer forms and their model-backed validation.
-- `urls.py` maps lab and computer list/create pages.
-- `admin.py` registers labs and computers and configures useful admin columns, filters, and search.
-- `tests.py` checks computer default status and its per-lab number constraint.
+- `models.py` stores `Lab` records (unique name and room, positive capacity, active state), `Computer` records (per-lab unique asset number, name, specifications, operating system, and status), and `MaintenanceRecord` records.
+- `views.py` provides login-protected searchable/paginated lists, permission-protected create/edit/delete views, and maintenance workflows.
+- `forms.py` defines styled model forms and requires a resolution when a maintenance record is marked resolved.
+- `urls.py` maps searchable list and create/edit/delete pages for labs, computers, and maintenance.
+- `admin.py` registers these models and configures searchable/filterable admin listings.
+- `tests.py` covers model constraints, maintenance status synchronization, authentication, and protected deletion.
 
 ### `apps/students/`
 
 - `models.py` stores a unique student ID, name, class/department, and optional email and phone contact details.
-- `views.py` displays and creates student records. Custom edit/delete pages are future work.
+- `views.py` provides login-protected searchable/paginated listings and permission-protected create/edit/delete views.
 - `forms.py` defines the student form.
-- `urls.py` maps student list/create pages.
+- `urls.py` maps searchable student list and create/edit/delete pages.
 - `admin.py` registers students with searchable, filterable columns.
-- `tests.py` checks student ID uniqueness.
+- `tests.py` checks student ID uniqueness and case-insensitive duplicate email validation.
 
 ### `apps/schedules/`
 
-- `models.py` stores schedule date, start/end time, purpose, and relationships to a lab, optional computer, optional student, and optional class name. It checks that a computer belongs to the selected lab, that a student or class is specified, that the end follows the start, and that relevant bookings do not overlap.
-- `views.py` displays and creates lab schedules. Custom edit/delete pages are future work.
-- `forms.py` defines the schedule form and browser date/time controls; Django model validation is applied when the form is validated.
-- `urls.py` maps schedule list/create pages.
+- `models.py` stores booking date, time range, purpose, status, requester, and relationships to lab, optional computer/student, or class name. It checks time ranges, lab/computer consistency, maintenance status, required audience, and conflicts.
+- `views.py` provides login-protected searchable/paginated listings and permission-protected booking request/edit/delete views.
+- `forms.py` defines styled date/time controls; users with schedule-change permission can set booking status and audience.
+- `urls.py` maps searchable booking list and create/edit/delete pages.
 - `admin.py` registers schedules with useful columns, filters, and search.
-- `tests.py` checks audience requirements, lab/computer consistency, overlap rejection, and adjacent non-overlapping bookings.
+- `tests.py` checks audience requirements, lab/computer consistency, overlap rejection, cancellation, time validation, maintenance availability, and booking permissions.
 
-Schedule overlap checks are application validation, not database exclusion constraints. They prevent ordinary conflicting form submissions but do not guarantee safety under concurrent writes. A deployed multi-user system should add transaction-safe enforcement.
+Schedule overlap checks run through model validation on every save. They prevent ordinary conflicting form submissions but do not guarantee serialization under concurrent writes, especially on SQLite. A deployed multi-user system should use transaction-safe enforcement appropriate to its production database.
+
+Listing pages require their corresponding Django `view` permission. Student users see only bookings attributed to their account and may submit booking requests; grant assistant groups the relevant add/change/delete permissions. Users and group membership are provisioned by administrators.
 
 ### `apps/dashboard/`
 
-- `views.py` calculates lab, computer, available-computer, student, and schedule counts for the dashboard.
+- `views.py` calculates lab, computer, available and maintenance computer, and student counts, plus upcoming and recent bookings.
 - `urls.py` maps the dashboard to the site root.
-- `tests.py` checks that the dashboard responds and includes its availability summary.
+- `tests.py` checks login protection and database-backed dashboard statistics.
 
 ## Templates
 
 - `templates/base.html` contains the shared HTML structure, navigation, Bootstrap stylesheet/script links, and project static-file links.
+- `templates/confirm_delete.html` confirms destructive actions before a protected server-side delete.
+- `templates/includes/pagination.html` renders the shared query-preserving pagination controls.
 - `templates/registration/login.html` displays Django's built-in login form.
 - `templates/dashboard/index.html` displays the summary counts.
-- `templates/labs/lab_list.html` and `computer_list.html` display lab and computer records.
-- `templates/labs/lab_form.html` and `computer_form.html` display the lab and computer create forms.
+- `templates/labs/lab_list.html`, `computer_list.html`, and `maintenance_list.html` display searchable equipment records.
+- `templates/labs/lab_form.html`, `computer_form.html`, and `maintenance_form.html` display management forms.
 - `templates/students/student_list.html` and `student_form.html` display student records and the student create form.
-- `templates/schedules/schedule_list.html` and `schedule_form.html` display schedule records and the schedule create form.
+- `templates/schedules/schedule_list.html` and `schedule_form.html` display and manage booking records.
 
 ## Static files
 
@@ -78,4 +83,4 @@ Schedule overlap checks are application validation, not database exclusion const
 
 ## Database and design decisions
 
-SQLite is the default database and its local `db.sqlite3` file is generated by migrations and ignored by Git. Foreign keys avoid duplicating lab/computer/student details in schedules. Computer numbers are unique within a lab; lab names, room numbers, and student IDs are unique. A schedule can target one computer or reserve an entire lab by leaving its computer empty. If a student is not selected, a class name is required. An entire-lab booking conflicts with any overlapping booking in that lab; a computer booking conflicts with the same computer and with an entire-lab booking.
+SQLite is the default database and its local `db.sqlite3` file is ignored by Git. New migrations add fields and tables without recreating the database. Protected foreign keys prevent accidental deletion of labs, computers, or students with dependent records. A schedule can target one computer or reserve an entire lab by leaving its computer empty. An entire-lab booking conflicts with any overlapping active booking in that lab; a computer booking conflicts with the same computer and with an entire-lab booking. Cancelled bookings do not conflict.

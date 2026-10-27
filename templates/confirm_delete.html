@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | Lab Management{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">CONFIRM ACTION</p><h1>{{ page_title }}</h1></div></div>
+<div class="record-form">
+    <p>Are you sure you want to delete <strong>{{ object }}</strong>?</p>
+    <p class="text-secondary">Records that are still referenced by related bookings or equipment cannot be deleted.</p>
+    <form method="post" data-confirm="Delete this record?">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Delete</button>
+        <a class="btn btn-outline-secondary" href="{{ view.success_url }}">Cancel</a>
+    </form>
+</div>
+{% endblock %}

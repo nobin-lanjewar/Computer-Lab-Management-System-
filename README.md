@@ -1,261 +1,144 @@
 # Computer Lab Management System
 
-## 1. Introduction
+A Django web application for managing laboratory spaces, computers, students, lab bookings, and computer maintenance. The existing Django apps and database are extended in place; migrations preserve existing records.
 
-The Computer Lab Management System is a beginner-friendly academic web application for organizing computer laboratories, computers, student records, and lab schedules. It is built with Python and Django and uses SQLite by default.
+## Features
 
-The current project is a working foundation: it includes the Django project, initial data models, Django admin, dashboard summaries, and list/create pages for the main records. It is not yet a complete production-ready management system.
+- Database-backed dashboard statistics and upcoming booking list.
+- Lab and computer create, view, edit, and delete workflows.
+- Student directory with unique student IDs and case-insensitive duplicate email validation.
+- Booking requests with requester attribution, requested/approved/cancelled status, date and status filters, and server-side conflict validation.
+- Maintenance history with pending, in-progress, and resolved states; active maintenance automatically marks a computer unavailable.
+- Search, filters, and pagination on lab, computer, student, booking, and maintenance listings.
+- Login-required pages and Django model permissions for record creation, editing, and deletion.
+- Protected relationships prevent deleting labs, computers, or students that are still referenced.
+- Django admin for staff users and responsive Bootstrap 5 pages.
 
-## 2. Problem Statement
+There is no public self-registration. Create users through Django admin or `createsuperuser`, then give users access by assigning Django permissions or groups.
 
-Keeping laboratory, computer, student, and timetable records in notebooks or separate files makes information difficult to update and check. It can also lead to duplicate records and conflicting computer bookings. A small web application can keep these records together and make them easier to review.
+## Technology
 
-## 3. Objectives
+- Python 3.10+
+- Django 5.2 or newer, below 7
+- SQLite for local development
+- HTML, CSS, JavaScript, and Bootstrap 5
+- `python-dotenv` for optional local `.env` configuration
 
-- Organize labs and their computers in one application.
-- Maintain student and class contact records.
-- Record computer availability and planned lab use.
-- Provide a simple dashboard and browser-based record pages.
-- Demonstrate Django models, forms, URLs, templates, the admin site, and tests.
-
-## 4. Features
-
-Implemented in this initial version:
-
-- Dashboard counts for labs, computers, students, and schedules, plus available-computer count.
-- Lab, computer, student, and schedule models with basic validation and uniqueness rules.
-- List and create pages for each record type.
-- Django admin registration for managing all four record types.
-- Schedule validation for time ranges, lab/computer consistency, audience selection, and overlapping bookings.
-- Basic automated model tests.
-
-Editing/deleting records, role-based permissions, reports, and production deployment are not implemented yet. Records can be managed through Django admin in the meantime.
-
-## 5. Technologies Used
-
-- **Backend:** Python, Django
-- **Frontend:** HTML5, CSS3, JavaScript, Bootstrap 5 (loaded from its public CDN)
-- **Database:** SQLite by default
-- **Version control:** Git
-
-## 6. Complete Folder Structure
+## Project structure
 
 ```text
-Computer-Lab-Management-System-/
-├── manage.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-├── .env.example
-├── config/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── apps/
-│   ├── __init__.py
-│   ├── labs/
-│   │   ├── __init__.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── forms.py
-│   │   ├── urls.py
-│   │   ├── admin.py
-│   │   ├── tests.py
-│   │   └── migrations/
-│   │       └── __init__.py
-│   ├── students/
-│   │   ├── __init__.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── forms.py
-│   │   ├── urls.py
-│   │   ├── admin.py
-│   │   ├── tests.py
-│   │   └── migrations/
-│   │       └── __init__.py
-│   ├── schedules/
-│   │   ├── __init__.py
-│   │   ├── apps.py
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── forms.py
-│   │   ├── urls.py
-│   │   ├── admin.py
-│   │   ├── tests.py
-│   │   └── migrations/
-│   │       └── __init__.py
-│   └── dashboard/
-│       ├── __init__.py
-│       ├── apps.py
-│       ├── views.py
-│       ├── urls.py
-│       └── tests.py
-├── templates/
-│   ├── base.html
-│   ├── registration/
-│   │   └── login.html
-│   ├── dashboard/
-│   │   └── index.html
-│   ├── labs/
-│   │   ├── computer_list.html
-│   │   ├── computer_form.html
-│   │   ├── lab_list.html
-│   │   └── lab_form.html
-│   ├── students/
-│   │   ├── student_list.html
-│   │   └── student_form.html
-│   └── schedules/
-│       ├── schedule_list.html
-│       └── schedule_form.html
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   ├── js/
-│   │   └── main.js
-│   └── images/
-│       └── .gitkeep
-├── docs/
-│   └── PROJECT_STRUCTURE.md
-└── tests/
-    └── __init__.py
+config/                 Django settings and root URLs
+apps/common/            Shared protected-delete behavior
+apps/dashboard/         Database-backed dashboard
+apps/labs/              Labs, computers, maintenance, and related forms
+apps/students/          Student records
+apps/schedules/         Lab bookings and overlap validation
+templates/              Shared layout and app pages
+static/                 Project CSS and JavaScript
+docs/                   Project structure notes
+manage.py               Django command-line entry point
+requirements.txt        Python dependencies
 ```
 
-## 7. Explanation of Important Files
+## Windows setup
 
-The detailed file-by-file guide is in [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md). In brief:
+Run these commands from the repository root, next to `manage.py`.
 
-- `manage.py` runs Django management commands.
-- `config/settings.py` configures apps, templates, static files, database, and environment-based settings.
-- `config/urls.py` connects the dashboard, app pages, login, and Django admin.
-- `apps/*/models.py` defines the database records; `forms.py` validates browser form input; `views.py` serves the current list/create pages; `urls.py` maps those pages; `admin.py` configures admin; and `tests.py` contains app tests.
-- `templates/` contains shared layout, dashboard, login, list, and create-form pages.
-- `static/` contains project CSS, JavaScript, and the images directory.
-- `requirements.txt` lists Python dependencies.
-- `.gitignore` excludes generated and secret files. `.env.example` documents environment variable names only.
-
-## 8. Database Overview
-
-The default database is SQLite, stored locally as `db.sqlite3` after the first migration. The database can be changed in `config/settings.py` if the project later needs a different database.
-
-- **Lab:** unique lab name and room number, plus an optional description.
-- **Computer:** computer number, lab foreign key, specifications, and status (`Available`, `In Use`, or `Under Maintenance`). Computer numbers are unique within a lab.
-- **Student:** unique student ID, name, class/department, and optional email/phone contact details.
-- **LabSchedule:** lab foreign key, optional computer and student foreign keys, optional class name, date, start/end times, and purpose. A schedule must name a student or a class. A computer must belong to the selected lab.
-
-The models validate that a schedule ends after it starts. A lab-wide booking (no computer selected) conflicts with every booking in that lab for an overlapping time; a computer booking conflicts with another booking for the same computer and with lab-wide bookings. These checks run through Django model/form validation. They are not database-level exclusion constraints, so deployments with concurrent booking writes should add transaction-safe conflict enforcement.
-
-## 9. Installation and Setup on Windows
-
-Run all commands below from the repository root (the directory containing `manage.py`). If you have not cloned the project, use the actual repository URL supplied by its owner; no repository URL is assumed here.
-
-```powershell
-git clone YOUR_REPOSITORY_URL
-cd Computer-Lab-Management-System-
-```
-
-## 10. Create and Activate a Virtual Environment
+### 1. Create and activate a virtual environment
 
 ```powershell
 py -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-If PowerShell blocks activation, allow scripts for this terminal session only, then activate:
+If PowerShell blocks activation, allow it for the current terminal only:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-Command Prompt alternative:
+Command Prompt users can run:
 
 ```bat
 .venv\Scripts\activate.bat
 ```
 
-## 11. Install Dependencies
-
-With the virtual environment activated, from the repository root:
+### 2. Install dependencies
 
 ```powershell
 py -m pip install -r requirements.txt
 ```
 
-## 12. Configure the Development Secret Key
+### 3. Configure development environment
 
-The application reads `DJANGO_SECRET_KEY` from the environment and does not store a real key in Git. Generate a key and set it for the current PowerShell session:
+Copy the example file and generate a local secret key. Keep `.env` private and do not commit it.
 
 ```powershell
+Copy-Item .env.example .env
 $env:DJANGO_SECRET_KEY = py -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+$env:DJANGO_DEBUG = "True"
+$env:DJANGO_ALLOWED_HOSTS = "127.0.0.1,localhost"
 ```
 
-For optional settings, `.env.example` lists variable names and safe placeholders. Django does not load `.env` files automatically; set the variables in your shell or use an environment-variable manager. `DJANGO_DEBUG` defaults to `True` for local development. Do not use debug mode or the development server for public production hosting.
+These `$env:` values apply to the current PowerShell session. For repeat use, put a generated key and the desired values in `.env`; `.env.example` intentionally contains no secret. If `DJANGO_SECRET_KEY` is omitted in development, Django generates a temporary development key. Production mode (`DJANGO_DEBUG=False`) requires an explicit secret key.
 
-## 13. Create and Apply Database Migrations
+### 4. Inspect and apply migrations
 
-From the repository root, create model migrations and apply them:
+Before applying migrations to an existing local database, inspect the migration state:
 
 ```powershell
-py manage.py makemigrations
+py manage.py showmigrations
+```
+
+The supplied migration changes are additive and include defaults for the new fields. Apply them without deleting or recreating `db.sqlite3`:
+
+```powershell
 py manage.py migrate
 ```
 
-## 14. Create a Django Superuser
+### 5. Create an administrator and run
 
 ```powershell
 py manage.py createsuperuser
-```
-
-Follow the prompts to create the local administrator account.
-
-## 15. Run the Development Server
-
-```powershell
 py manage.py runserver
 ```
 
-## 16. Open the Application
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and sign in. The Django admin is at [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
 
-Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) for the dashboard or [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) for Django admin. The login page is at [http://127.0.0.1:8000/accounts/login/](http://127.0.0.1:8000/accounts/login/).
+## Roles and permissions
 
-## 17. Run Tests
+Authentication uses Django's built-in users, groups, and model permissions. The superuser created above has full access. To provide more limited access, use **Admin → Groups** to create groups and assign only the required permissions, then add users to those groups. For example:
 
-From the repository root, run the project tests:
+- **Lab assistants:** grant the needed `view`, `add`, `change`, and `delete` permissions for labs, computers, maintenance records, students, and schedules. Grant schedule change permission to staff responsible for approving requests.
+- **Students:** grant `labs | lab | Can view lab`, `labs | computer | Can view computer`, and `schedules | lab schedule | Can view lab schedule` plus `schedules | lab schedule | Can add lab schedule`. Students can see only their own bookings and cannot choose another student or approve a booking.
+
+Users need to be created by an administrator; this project does not expose a self-service registration form. Pages require login and listing pages require their corresponding view permission. Create, edit, and delete actions are individually protected by model permissions, and destructive operations also use protected database relationships.
+
+## Testing and checks
+
+Activate the virtual environment and configure `DJANGO_SECRET_KEY`, then run:
 
 ```powershell
+py manage.py check
 py manage.py test
+py manage.py makemigrations --check --dry-run
 ```
 
-## 18. Troubleshooting
+Tests cover permissions, CRUD-related protections, database-driven dashboard statistics, maintenance status transitions, email validation, booking time validation, and overlapping bookings.
 
-- **`DJANGO_SECRET_KEY` is missing:** Set it in the same terminal session before running Django commands, as shown above.
-- **`No module named django`:** Activate `.venv` and run `py -m pip install -r requirements.txt`.
-- **PowerShell will not activate `.venv`:** Use the process-scoped execution policy command in the virtual-environment section, or use Command Prompt activation.
-- **Database or table errors:** From the repository root, run `py manage.py migrate`.
-- **Port 8000 is occupied:** Run `py manage.py runserver 8001` and open `http://127.0.0.1:8001/`.
-- **Bootstrap styling does not load:** Bootstrap is served from a CDN and requires an internet connection; the project's own CSS remains local.
+## Data and booking behavior
 
-## 19. Future Scope
+- A computer's asset number (`computer_number`) is unique within its lab. Lab room number and name, and student ID, are unique.
+- Lab capacity must be positive. Mark unused labs inactive rather than deleting them.
+- Schedules can book a specific computer or an entire lab. End times must follow start times; overlapping active requests/approved bookings are rejected. Cancelled bookings do not block later bookings.
+- A computer under maintenance cannot be booked. Creating or activating maintenance marks it under maintenance; resolving the last active maintenance record restores it to Available.
+- Labs, computers, and students with related records cannot be deleted until those relationships are removed. A clear message is shown rather than cascading data loss.
+- Application validation checks booking conflicts on every server-side save. If deploying with concurrent writers, use a database and transaction strategy suitable for serialization; SQLite is intended for local development.
 
-- Add edit/delete workflows and confirmation pages.
-- Add user authentication and role-based permissions to management pages.
-- Enforce schedule conflict checks safely during concurrent requests.
-- Add search, filters, reports, and maintenance history.
-- Add deployment configuration and production security settings.
+## Security and deployment notes
 
-## 20. Conclusion
-
-This project provides a small, understandable Django foundation for a Computer Lab Management System. It establishes the core records and a working path for extending the application while keeping unimplemented features clearly identified.
-
-## 21. Author
-
-**Nobindas Lanjewar**
+- Never commit `.env`, a production secret key, or a real database.
+- `DEBUG` defaults to development mode. Set `DJANGO_DEBUG=False`, configure a strong `DJANGO_SECRET_KEY`, and set `DJANGO_ALLOWED_HOSTS` before production use.
+- Configure HTTPS, secure cookies, static-file serving, backups, and a production-grade database before deployment.
+- Bootstrap is loaded from its public CDN; the app's custom CSS and JavaScript are served locally.

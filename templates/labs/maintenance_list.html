@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Maintenance | Lab Management{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><p class="eyebrow">EQUIPMENT</p><h1>Maintenance</h1><p class="text-secondary mb-0">Track reported issues and repair progress.</p></div>
+    {% if perms.labs.add_maintenancerecord %}<a class="btn btn-primary" href="{% url 'labs:maintenance-create' %}">Report issue</a>{% endif %}
+</div>
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-7"><label class="form-label" for="maintenance-search">Search records</label><input id="maintenance-search" class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Issue, asset, technician, lab"></div>
+    <div class="col-md-3"><label class="form-label" for="maintenance-status">Status</label><select id="maintenance-status" class="form-select" name="status"><option value="">All</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-outline-primary" type="submit">Filter</button><a class="btn btn-outline-secondary" href="{% url 'labs:maintenance-list' %}">Reset</a></div>
+</form>
+<div class="panel-card">
+{% if records %}
+<div class="table-responsive"><table class="table mb-3"><thead><tr><th>Reported</th><th>Computer</th><th>Issue</th><th>Technician</th><th>Status</th><th>Resolution</th><th></th></tr></thead>
+<tbody>{% for record in records %}<tr>
+    <td>{{ record.reported_at|date:"M j, Y" }}</td>
+    <td>{{ record.computer.computer_number }}<div class="small text-secondary">{{ record.computer.lab.name }}</div></td>
+    <td>{{ record.issue|truncatechars:90 }}</td><td>{{ record.assigned_technician|default:"—" }}</td>
+    <td><span class="badge {% if record.status == 'resolved' %}text-bg-success{% elif record.status == 'in_progress' %}text-bg-primary{% else %}text-bg-warning{% endif %}">{{ record.get_status_display }}</span></td>
+    <td>{{ record.resolution|default:"—"|truncatechars:70 }}</td>
+    <td class="text-end text-nowrap">{% if perms.labs.change_maintenancerecord %}<a class="btn btn-sm btn-outline-primary" href="{% url 'labs:maintenance-update' record.pk %}">Edit</a>{% endif %} {% if perms.labs.delete_maintenancerecord %}<a class="btn btn-sm btn-outline-danger" href="{% url 'labs:maintenance-delete' record.pk %}">Delete</a>{% endif %}</td>
+</tr>{% endfor %}</tbody></table></div>
+{% include "includes/pagination.html" %}
+{% else %}<p class="empty-state mb-0">No maintenance records match these filters.</p>{% endif %}
+</div>
+{% endblock %}

@@ -15,9 +15,19 @@ class LabScheduleForm(forms.ModelForm):
             "start_time",
             "end_time",
             "purpose",
+            "status",
         ]
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}),
             "start_time": forms.TimeInput(attrs={"type": "time"}),
             "end_time": forms.TimeInput(attrs={"type": "time"}),
         }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        can_manage = user and user.has_perm("schedules.change_labschedule")
+        if not can_manage:
+            self.fields.pop("status", None)
+            self.fields.pop("student", None)
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"

@@ -2,7 +2,8 @@
 {% block title %}Dashboard | Lab Management{% endblock %}
 {% block content %}
 <div class="page-heading">
-    <div><p class="eyebrow">OVERVIEW</p><h1>Computer lab dashboard</h1><p class="text-secondary mb-0">A live view of your labs, equipment, and bookings.</p></div>
+    <div><p class="eyebrow">{{ dashboard_role|upper }}</p><h1>{% if is_admin_dashboard %}Administration dashboard{% else %}Lab assistant dashboard{% endif %}</h1><p class="text-secondary mb-0">{% if is_admin_dashboard %}Manage accounts and review the whole lab system.{% else %}A live view of your labs, equipment, and bookings.{% endif %}</p></div>
+    {% if is_admin_dashboard %}<a class="btn btn-primary" href="{% url 'lab-assistant-create' %}">Create lab assistant</a>{% endif %}
     {% if perms.schedules.add_labschedule %}<a class="btn btn-primary" href="{% url 'schedules:schedule-create' %}">Request a booking</a>{% endif %}
 </div>
 <div class="row g-3 mb-4">
@@ -18,9 +19,9 @@
             <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Upcoming bookings</h2>{% if perms.schedules.view_labschedule %}<a href="{% url 'schedules:schedule-list' %}">All bookings</a>{% endif %}</div>
             {% if upcoming_schedules %}
             <div class="table-responsive"><table class="table align-middle mb-0">
-                <thead><tr><th>Date / time</th><th>Lab</th><th>Booked for</th><th>Status</th></tr></thead>
+                <thead><tr><th>Date / time</th><th>Lab</th><th>Booked for</th><th>Status</th>{% if can_manage_bookings %}<th>Action</th>{% endif %}</tr></thead>
                 <tbody>{% for schedule in upcoming_schedules %}
-                    <tr><td>{{ schedule.date|date:"M j, Y" }}<br><span class="small text-secondary">{{ schedule.start_time|time:"H:i" }}–{{ schedule.end_time|time:"H:i" }}</span></td><td>{{ schedule.lab.name }}</td><td>{% if schedule.student %}{{ schedule.student.name }}{% else %}{{ schedule.class_name }}{% endif %}</td><td><span class="badge {% if schedule.status == 'approved' %}text-bg-success{% elif schedule.status == 'cancelled' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ schedule.get_status_display }}</span></td></tr>
+                    <tr><td>{{ schedule.date|date:"M j, Y" }}<br><span class="small text-secondary">{{ schedule.start_time|time:"H:i" }}–{{ schedule.end_time|time:"H:i" }}</span></td><td>{{ schedule.lab.name }}</td><td>{% if schedule.student %}{{ schedule.student.name }}{% else %}{{ schedule.class_name }}{% endif %}</td><td><span class="badge {% if schedule.status == 'approved' %}text-bg-success{% elif schedule.status == 'cancelled' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ schedule.get_status_display }}</span></td>{% if can_manage_bookings %}<td><a href="{% url 'schedules:schedule-update' schedule.pk %}">Review</a></td>{% endif %}</tr>
                 {% endfor %}</tbody>
             </table></div>
             {% else %}<p class="empty-state mb-0">No upcoming bookings.</p>{% endif %}

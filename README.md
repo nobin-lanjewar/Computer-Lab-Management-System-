@@ -10,11 +10,15 @@ A Django web application for managing laboratory spaces, computers, students, la
 - Booking requests with requester attribution, requested/approved/cancelled status, date and status filters, and server-side conflict validation.
 - Maintenance history with pending, in-progress, and resolved states; active maintenance automatically marks a computer unavailable.
 - Search, filters, and pagination on lab, computer, student, booking, and maintenance listings.
+- Django built-in login/logout, password validation, sessions, and password hashing.
+- Student self-registration, with unique student profile IDs and automatic Student role assignment.
+- Admin-created Lab Assistant accounts and automatic group-based permissions.
+- Separate Admin, Lab Assistant, and Student dashboards with role-based server-side access.
 - Login-required pages and Django model permissions for record creation, editing, and deletion.
 - Protected relationships prevent deleting labs, computers, or students that are still referenced.
 - Django admin for staff users and responsive Bootstrap 5 pages.
 
-There is no public self-registration. Create users through Django admin or `createsuperuser`, then give users access by assigning Django permissions or groups.
+Students can register through the public registration page. Admin accounts are created only with Django's `createsuperuser` command; logged-in superusers can create Lab Assistant accounts from the application.
 
 ## Technology
 
@@ -104,16 +108,17 @@ py manage.py createsuperuser
 py manage.py runserver
 ```
 
-Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and sign in. The Django admin is at [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and sign in. Students can register at [http://127.0.0.1:8000/accounts/register/](http://127.0.0.1:8000/accounts/register/). The Django admin is at [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
 
 ## Roles and permissions
 
-Authentication uses Django's built-in users, groups, and model permissions. The superuser created above has full access. To provide more limited access, use **Admin → Groups** to create groups and assign only the required permissions, then add users to those groups. For example:
+Authentication uses Django's built-in users, groups, model permissions, sessions, password hashing, and password validators. Roles are assigned with built-in groups:
 
-- **Lab assistants:** grant the needed `view`, `add`, `change`, and `delete` permissions for labs, computers, maintenance records, students, and schedules. Grant schedule change permission to staff responsible for approving requests.
-- **Students:** grant `labs | lab | Can view lab`, `labs | computer | Can view computer`, and `schedules | lab schedule | Can view lab schedule` plus `schedules | lab schedule | Can add lab schedule`. Students can see only their own bookings and cannot choose another student or approve a booking.
+- **Admin:** create with `createsuperuser`. Only superusers can use the in-app Lab Assistant account creation page.
+- **Lab Assistant:** created by a superuser. The account receives the Lab Assistants group and record-management permissions; it is not granted Django `is_staff` or superuser access.
+- **Student:** self-registration creates a linked Student profile and adds the Students group. Students can request lab bookings and see only their own booking records.
 
-Users need to be created by an administrator; this project does not expose a self-service registration form. Pages require login and listing pages require their corresponding view permission. Create, edit, and delete actions are individually protected by model permissions, and destructive operations also use protected database relationships.
+After login, Django redirects each role to its separate dashboard. Role dashboard routes and all record views enforce access server-side; hiding a navigation link is not used as a permission check. Users created manually in Django admin should be assigned the appropriate group.
 
 ## Testing and checks
 

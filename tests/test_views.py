@@ -43,7 +43,7 @@ class ManagementPageSmokeTests(TestCase):
 
     def test_lists_forms_and_confirmation_pages_render(self):
         pages = [
-            "dashboard:index",
+            "dashboard:admin",
             "labs:lab-list",
             "labs:lab-create",
             "labs:lab-update",
@@ -64,6 +64,7 @@ class ManagementPageSmokeTests(TestCase):
             "schedules:schedule-create",
             "schedules:schedule-update",
             "schedules:schedule-delete",
+            "lab-assistant-create",
         ]
         objects = {
             "labs:lab-update": self.lab.pk,

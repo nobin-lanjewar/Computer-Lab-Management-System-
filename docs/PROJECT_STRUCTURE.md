@@ -24,7 +24,7 @@ This guide describes the purpose of the important files in the Computer Lab Mana
 - `apps/__init__.py` makes the app collection importable as a Python package.
 - Each app's `apps.py` gives Django its app configuration and display name.
 - Each app's `migrations/__init__.py` marks the migration directory as a package. Run `makemigrations` to create the initial migration files from the models.
-- `apps/common/views.py` supplies a shared delete view that reports protected relationships without deleting dependent data.
+- `apps/common/views.py` supplies a shared delete view that reports protected relationships without deleting dependent data; `apps/common/auth.py` assigns built-in Django groups, permissions, and role-specific dashboard routes.
 
 ### `apps/labs/`
 
@@ -37,12 +37,13 @@ This guide describes the purpose of the important files in the Computer Lab Mana
 
 ### `apps/students/`
 
-- `models.py` stores a unique student ID, name, class/department, and optional email and phone contact details.
+- `models.py` stores a unique student ID, name, class/department, optional email and phone contact details, and an optional one-to-one Django user account.
 - `views.py` provides login-protected searchable/paginated listings and permission-protected create/edit/delete views.
 - `forms.py` defines the student form.
 - `urls.py` maps searchable student list and create/edit/delete pages.
 - `admin.py` registers students with searchable, filterable columns.
 - `tests.py` checks student ID uniqueness and case-insensitive duplicate email validation.
+- `StudentRegistrationForm` creates the user with Django's `UserCreationForm`, stores the related student profile, and assigns the Student group. The Lab Assistant account form is available only to superusers.
 
 ### `apps/schedules/`
 
@@ -55,13 +56,13 @@ This guide describes the purpose of the important files in the Computer Lab Mana
 
 Schedule overlap checks run through model validation on every save. They prevent ordinary conflicting form submissions but do not guarantee serialization under concurrent writes, especially on SQLite. A deployed multi-user system should use transaction-safe enforcement appropriate to its production database.
 
-Listing pages require their corresponding Django `view` permission. Student users see only bookings attributed to their account and may submit booking requests; grant assistant groups the relevant add/change/delete permissions. Users and group membership are provisioned by administrators.
+Listing pages require their corresponding Django `view` permission. Student users see only bookings attributed to their account and may submit booking requests; grant assistant groups the relevant add/change/delete permissions. Users and group membership are provisioned by administrators. Deleting a student profile linked to a login account is protected to prevent orphaning an active Student role.
 
 ### `apps/dashboard/`
 
-- `views.py` calculates lab, computer, available and maintenance computer, and student counts, plus upcoming and recent bookings.
-- `urls.py` maps the dashboard to the site root.
-- `tests.py` checks login protection and database-backed dashboard statistics.
+- `views.py` routes users to separate Admin, Lab Assistant, and Student dashboards and calculates their role-appropriate context.
+- `urls.py` maps the role dashboard routes and the role-aware landing page.
+- `tests.py` checks login/logout, role-based dashboards, assistant creation, and database-backed dashboard statistics.
 
 ## Templates
 
@@ -69,7 +70,9 @@ Listing pages require their corresponding Django `view` permission. Student user
 - `templates/confirm_delete.html` confirms destructive actions before a protected server-side delete.
 - `templates/includes/pagination.html` renders the shared query-preserving pagination controls.
 - `templates/registration/login.html` displays Django's built-in login form.
+- `templates/registration/register.html` provides student self-registration; `lab_assistant_form.html` provides the superuser-only assistant creation form.
 - `templates/dashboard/index.html` displays the summary counts.
+- `templates/dashboard/student.html` displays the authenticated student's profile and own booking history.
 - `templates/labs/lab_list.html`, `computer_list.html`, and `maintenance_list.html` display searchable equipment records.
 - `templates/labs/lab_form.html`, `computer_form.html`, and `maintenance_form.html` display management forms.
 - `templates/students/student_list.html` and `student_form.html` display student records and the student create form.

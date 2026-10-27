@@ -94,6 +94,48 @@ body {
     padding: 1.35rem;
 }
 
+.auth-shell {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: calc(100vh - 13rem);
+    padding: 1rem 0;
+}
+
+.auth-shell-wide {
+    min-height: auto;
+}
+
+.auth-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    box-shadow: 0 12px 40px rgb(29 49 48 / 8%);
+    max-width: 29rem;
+    padding: clamp(1.35rem, 5vw, 2.25rem);
+    width: 100%;
+}
+
+.auth-shell-wide .auth-card {
+    max-width: 40rem;
+}
+
+.auth-form {
+    background: transparent;
+    border: 0;
+    max-width: none;
+    padding: 0;
+}
+
+.auth-form label {
+    font-weight: 600;
+}
+
+.auth-form .form-text ul {
+    margin-bottom: 0;
+    padding-left: 1.1rem;
+}
+
 .table {
     --bs-table-bg: transparent;
     vertical-align: middle;

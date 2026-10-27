@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Student dashboard | Lab Management{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><p class="eyebrow">STUDENT PORTAL</p><h1>Hello, {{ student.name }}</h1><p class="text-secondary mb-0">{{ student.student_id }} · {{ student.class_department }}</p></div>
+    {% if perms.schedules.add_labschedule %}<a class="btn btn-primary" href="{% url 'schedules:schedule-create' %}">Request a lab booking</a>{% endif %}
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="stat-card"><span>Department / class</span><strong class="h4">{{ student.class_department }}</strong></div></div>
+    <div class="col-md-4"><div class="stat-card"><span>Student ID</span><strong class="h4">{{ student.student_id }}</strong></div></div>
+    <div class="col-md-4"><div class="stat-card"><span>Contact email</span><strong class="h5">{{ student.email }}</strong></div></div>
+</div>
+<section class="panel-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><p class="eyebrow mb-1">YOUR SCHEDULE</p><h2 class="h5 mb-0">Recent bookings</h2></div>
+        {% if perms.schedules.view_labschedule %}<a href="{% url 'schedules:schedule-list' %}">View all</a>{% endif %}
+    </div>
+    {% if bookings %}
+    <div class="table-responsive"><table class="table mb-0">
+        <thead><tr><th>Date / time</th><th>Lab / computer</th><th>Purpose</th><th>Status</th></tr></thead>
+        <tbody>{% for booking in bookings %}
+            <tr>
+                <td>{{ booking.date|date:"M j, Y" }}<div class="small text-secondary">{{ booking.start_time|time:"H:i" }}–{{ booking.end_time|time:"H:i" }}</div></td>
+                <td>{{ booking.lab.name }}{% if booking.computer %}<div class="small text-secondary">{{ booking.computer.computer_number }}</div>{% endif %}</td>
+                <td>{{ booking.purpose }}</td>
+                <td><span class="badge {% if booking.status == 'approved' %}text-bg-success{% elif booking.status == 'cancelled' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ booking.get_status_display }}</span></td>
+            </tr>
+        {% endfor %}</tbody>
+    </table></div>
+    {% else %}<p class="empty-state mb-0">You have not requested a booking yet.</p>{% endif %}
+</section>
+{% endblock %}

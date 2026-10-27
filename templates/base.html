@@ -28,6 +28,7 @@
                     {% if user.is_staff %}<a class="nav-link" href="{% url 'admin:index' %}">Admin</a>{% endif %}
                 </div>
                 <div class="d-flex align-items-center gap-3">
+                    {% if user.is_superuser %}<a class="btn btn-sm btn-outline-light" href="{% url 'lab-assistant-create' %}">Add lab assistant</a>{% endif %}
                     <span class="navbar-text">{{ user.get_full_name|default:user.username }}</span>
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
@@ -36,7 +37,10 @@
                 </div>
             </div>
             {% else %}
-            <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">Log in</a>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">Log in</a>
+                <a class="btn btn-light btn-sm" href="{% url 'student-register' %}">Student registration</a>
+            </div>
             {% endif %}
         </div>
     </nav>

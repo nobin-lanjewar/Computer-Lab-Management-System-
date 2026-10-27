@@ -1,16 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Log in | Lab Management{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <h1 class="h3 mb-3">Log in</h1>
+<div class="auth-shell">
+    <div class="auth-card">
+        <p class="eyebrow">WELCOME BACK</p>
+        <h1 class="h3 mb-2">Sign in to your account</h1>
+        <p class="text-secondary mb-4">Use the account provided for your role.</p>
         {% if form.errors %}<div class="alert alert-danger" role="alert">The username or password was not recognized.</div>{% endif %}
-        <form method="post" class="record-form">
+        <form method="post" class="record-form auth-form">
             {% csrf_token %}
-            {{ form.as_p }}
+            {% for field in form %}
+                {% if field.name != "next" %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>{% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
             <input type="hidden" name="next" value="{{ next }}">
-            <button class="btn btn-primary" type="submit">Log in</button>
+            <button class="btn btn-primary w-100" type="submit">Log in</button>
         </form>
+        <p class="text-center text-secondary mt-4 mb-0">New student? <a href="{% url 'student-register' %}">Create an account</a></p>
     </div>
 </div>
 {% endblock %}

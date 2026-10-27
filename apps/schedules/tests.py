@@ -6,6 +6,7 @@ from django.contrib.auth.models import Permission, User
 from django.urls import reverse
 
 from apps.labs.models import Computer, Lab
+from apps.common.auth import STUDENT_ROLE, assign_role
 from apps.students.models import Student
 
 from .models import LabSchedule
@@ -126,6 +127,9 @@ class LabScheduleModelTests(TestCase):
         self.assertEqual(anonymous_response.status_code, 302)
 
         user = User.objects.create_user(username="student-user", password="safe-password")
+        self.student.user = user
+        self.student.save()
+        assign_role(user, STUDENT_ROLE)
         permission = Permission.objects.get(
             content_type__app_label="schedules", codename="add_labschedule"
         )
@@ -144,7 +148,7 @@ class LabScheduleModelTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("dashboard:index"))
+        self.assertRedirects(response, reverse("schedules:schedule-list"))
         schedule = LabSchedule.objects.get(date=date(2026, 10, 28))
         self.assertEqual(schedule.requester, user)
         self.assertEqual(schedule.status, LabSchedule.Status.REQUESTED)

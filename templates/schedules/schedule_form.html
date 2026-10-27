@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Add schedule | Computer Lab Management System{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Add lab schedule</h1>
+<form method="post" class="record-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary" type="submit">Save schedule</button>
+    <a class="btn btn-outline-secondary" href="{% url 'schedules:schedule-list' %}">Cancel</a>
+</form>
+{% endblock %}

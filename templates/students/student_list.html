@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Students | Computer Lab Management System{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">Students</h1>
+    <a class="btn btn-primary" href="{% url 'students:student-create' %}">Add student</a>
+</div>
+{% if students %}
+<div class="table-responsive"><table class="table table-striped align-middle">
+    <thead><tr><th>Student ID</th><th>Name</th><th>Class / department</th><th>Email</th><th>Phone</th></tr></thead>
+    <tbody>{% for student in students %}<tr><td>{{ student.student_id }}</td><td>{{ student.name }}</td><td>{{ student.class_department }}</td><td>{{ student.email|default:"—" }}</td><td>{{ student.phone|default:"—" }}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<p class="text-muted">No students have been added yet.</p>{% endif %}
+{% endblock %}

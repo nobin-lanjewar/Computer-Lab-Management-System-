@@ -1,14 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Schedules | Computer Lab Management System{% endblock %}
+{% block title %}Bookings | Lab Management{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h2 mb-0">Lab schedules</h1>
-    <a class="btn btn-primary" href="{% url 'schedules:schedule-create' %}">Add schedule</a>
+<div class="page-heading">
+    <div><p class="eyebrow">SCHEDULING</p><h1>Lab bookings</h1><p class="text-secondary mb-0">Requests and approved lab schedules.</p></div>
+    {% if perms.schedules.add_labschedule %}<a class="btn btn-primary" href="{% url 'schedules:schedule-create' %}">Request booking</a>{% endif %}
 </div>
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-5"><label class="form-label" for="schedule-search">Search bookings</label><input id="schedule-search" class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Lab, student, class, purpose"></div>
+    <div class="col-md-3"><label class="form-label" for="schedule-date">Date</label><input id="schedule-date" class="form-control" type="date" name="date" value="{{ request.GET.date }}"></div>
+    <div class="col-md-2"><label class="form-label" for="schedule-status">Status</label><select class="form-select" id="schedule-status" name="status"><option value="">All</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-outline-primary" type="submit">Filter</button><a class="btn btn-outline-secondary" href="{% url 'schedules:schedule-list' %}">Reset</a></div>
+</form>
+<div class="panel-card">
 {% if schedules %}
-<div class="table-responsive"><table class="table table-striped align-middle">
-    <thead><tr><th>Date</th><th>Time</th><th>Lab / computer</th><th>Student / class</th><th>Purpose</th></tr></thead>
-    <tbody>{% for schedule in schedules %}<tr><td>{{ schedule.date }}</td><td>{{ schedule.start_time }}–{{ schedule.end_time }}</td><td>{{ schedule.lab.name }}{% if schedule.computer %} / {{ schedule.computer.computer_number }}{% endif %}</td><td>{% if schedule.student %}{{ schedule.student.name }}{% endif %}{% if schedule.student and schedule.class_name %} / {% endif %}{{ schedule.class_name }}</td><td>{{ schedule.purpose }}</td></tr>{% endfor %}</tbody>
+<div class="table-responsive"><table class="table mb-3">
+    <thead><tr><th>Date / time</th><th>Lab / computer</th><th>Booked for</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+    <tbody>{% for schedule in schedules %}<tr>
+        <td>{{ schedule.date|date:"M j, Y" }}<div class="small text-secondary">{{ schedule.start_time|time:"H:i" }}–{{ schedule.end_time|time:"H:i" }}</div></td>
+        <td>{{ schedule.lab.name }}{% if schedule.computer %}<div class="small text-secondary">{{ schedule.computer.computer_number }}</div>{% endif %}</td>
+        <td>{% if schedule.student %}{{ schedule.student.name }}{% else %}{{ schedule.class_name }}{% endif %}<div class="small text-secondary">{{ schedule.requester|default:"—" }}</div></td>
+        <td>{{ schedule.purpose }}</td>
+        <td><span class="badge {% if schedule.status == 'approved' %}text-bg-success{% elif schedule.status == 'cancelled' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ schedule.get_status_display }}</span></td>
+        <td class="text-end text-nowrap">{% if perms.schedules.change_labschedule %}<a class="btn btn-sm btn-outline-primary" href="{% url 'schedules:schedule-update' schedule.pk %}">Edit</a>{% endif %} {% if perms.schedules.delete_labschedule %}<a class="btn btn-sm btn-outline-danger" href="{% url 'schedules:schedule-delete' schedule.pk %}">Delete</a>{% endif %}</td>
+    </tr>{% endfor %}</tbody>
 </table></div>
-{% else %}<p class="text-muted">No schedules have been added yet.</p>{% endif %}
+{% include "includes/pagination.html" %}
+{% else %}<p class="empty-state mb-0">No bookings match these filters.</p>{% endif %}
+</div>
 {% endblock %}

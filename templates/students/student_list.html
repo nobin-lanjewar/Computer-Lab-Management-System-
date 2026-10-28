@@ -1,14 +1,25 @@
 {% extends "base.html" %}
-{% block title %}Students | Computer Lab Management System{% endblock %}
+{% block title %}Students | Lab Management{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h2 mb-0">Students</h1>
-    <a class="btn btn-primary" href="{% url 'students:student-create' %}">Add student</a>
+<div class="page-heading">
+    <div><p class="eyebrow">PEOPLE</p><h1>Students</h1><p class="text-secondary mb-0">Manage student contact and department records.</p></div>
+    {% if perms.students.add_student %}<a class="btn btn-primary" href="{% url 'students:student-create' %}">Add student</a>{% endif %}
 </div>
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-9"><label class="form-label" for="student-search">Search students</label><input id="student-search" class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Student ID, name, department, email"></div>
+    <div class="col-md-3 d-flex gap-2"><button class="btn btn-outline-primary" type="submit">Search</button><a class="btn btn-outline-secondary" href="{% url 'students:student-list' %}">Reset</a></div>
+</form>
+<div class="panel-card">
 {% if students %}
-<div class="table-responsive"><table class="table table-striped align-middle">
-    <thead><tr><th>Student ID</th><th>Name</th><th>Class / department</th><th>Email</th><th>Phone</th></tr></thead>
-    <tbody>{% for student in students %}<tr><td>{{ student.student_id }}</td><td>{{ student.name }}</td><td>{{ student.class_department }}</td><td>{{ student.email|default:"—" }}</td><td>{{ student.phone|default:"—" }}</td></tr>{% endfor %}</tbody>
+<div class="table-responsive"><table class="table mb-3">
+    <thead><tr><th>Student</th><th>Class / department</th><th>Email</th><th>Phone</th><th></th></tr></thead>
+    <tbody>{% for student in students %}<tr>
+        <td><strong>{{ student.name }}</strong><div class="small text-secondary">{{ student.student_id }}</div></td>
+        <td>{{ student.class_department }}</td><td>{{ student.email|default:"—" }}</td><td>{{ student.phone|default:"—" }}</td>
+        <td class="text-end text-nowrap">{% if perms.students.change_student %}<a class="btn btn-sm btn-outline-primary" href="{% url 'students:student-update' student.pk %}">Edit</a>{% endif %} {% if perms.students.delete_student %}<a class="btn btn-sm btn-outline-danger" href="{% url 'students:student-delete' student.pk %}">Delete</a>{% endif %}</td>
+    </tr>{% endfor %}</tbody>
 </table></div>
-{% else %}<p class="text-muted">No students have been added yet.</p>{% endif %}
+{% include "includes/pagination.html" %}
+{% else %}<p class="empty-state mb-0">No students match this search.</p>{% endif %}
+</div>
 {% endblock %}

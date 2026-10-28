@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Add schedule | Computer Lab Management System{% endblock %}
+{% block title %}{{ page_title }} | Lab Management{% endblock %}
 {% block content %}
-<h1 class="h2 mb-3">Add lab schedule</h1>
+<div class="page-heading"><div><p class="eyebrow">SCHEDULING</p><h1>{{ page_title }}</h1><p class="text-secondary mb-0">Overlapping bookings are rejected on the server.</p></div></div>
 <form method="post" class="record-form">
     {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
     {{ form.as_p }}
-    <button class="btn btn-primary" type="submit">Save schedule</button>
+    <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
     <a class="btn btn-outline-secondary" href="{% url 'schedules:schedule-list' %}">Cancel</a>
 </form>
 {% endblock %}
